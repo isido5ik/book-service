@@ -11,6 +11,7 @@ type Service interface {
 	GetBookById(id int) (dtos.Book, error)
 	DeleteBook(id int) error
 	UpdateBook(id int, input dtos.BookUpdateInput) error
+	GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error)
 }
 
 type service struct {

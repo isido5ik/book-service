@@ -42,6 +42,32 @@ func (h *Handler) getAllBooks(c *gin.Context) {
 	})
 
 }
+
+func (h *Handler) getBooksByFilter(c *gin.Context) {
+	var filter dtos.BookFilter
+	if err := c.BindJSON(&filter); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := filter.Validate()
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	books, err := h.services.GetBooksByFilter(filter)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, getAllBooksResponse{
+		Data: books,
+	})
+
+}
+
 func (h *Handler) getBookById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

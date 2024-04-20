@@ -13,18 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// type BooksPostgres struct {
-// 	db    *sqlx.DB
-// 	redis *redis.Client
-// }
-
-// func NewBooksPostgres(db *sqlx.DB) *BooksPostgres {
-// 	return &BooksPostgres{
-// 		db:    db,
-// 		redis: NewRedisClient(),
-// 	}
-// }
-
 func (r *repository) CreateBook(book dtos.Book) (int, error) {
 	var id int
 	query := fmt.Sprintf("INSERT INTO %s (name, author, page_number, date, rating) VALUES($1, $2, $3, $4, $5) RETURNING id", booksTable)
@@ -37,49 +25,61 @@ func (r *repository) CreateBook(book dtos.Book) (int, error) {
 }
 
 func (r *repository) GetAllBooks() ([]dtos.Book, error) {
-
 	var books []dtos.Book
-	query := fmt.Sprintf("SELECT * FROM %s ", booksTable)
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY rating ASC", booksTable)
 	err := r.db.Select(&books, query)
 
 	return books, err
 }
 
-// func (r *repository) GetBookById(id int) (dtos.Book, error) {
+// default: ORDER BY rating
+func (r *repository) GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error) {
+	var books []dtos.Book
 
-// 	var book dtos.Book
+	query := fmt.Sprintf("SELECT * FROM %s WHERE 1=1", booksTable)
+	args := make([]interface{}, 0)
+	argID := 1
 
-// 	JSONbook, redisErr := r.redis.Get(context.Background(), strconv.Itoa(id)).Result()
-// 	if redisErr == nil {
-// 		json.Unmarshal([]byte(JSONbook), &book)
-// 		log.Println("Getting element from redis")
-// 		return book, nil
-// 	}
+	if filter.Name != "" {
+		query += fmt.Sprintf(" AND name ILIKE $%d", argID)
+		args = append(args, "%"+filter.Name+"%")
+		argID++
+	}
+	if filter.Author != "" {
+		query += fmt.Sprintf(" AND author ILIKE $%d", argID)
+		args = append(args, "%"+filter.Author+"%")
+		argID++
+	}
+	if filter.PageNumberMin != 0 {
+		query += fmt.Sprintf(" AND page_number >= $%d", argID)
+		args = append(args, filter.PageNumberMin)
+		argID++
+	}
+	if filter.PageNumberMax != 0 {
+		query += fmt.Sprintf(" AND page_number <= $%d", argID)
+		args = append(args, filter.PageNumberMax)
+		argID++
+	}
 
-// 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", booksTable)
-// 	err := r.db.Get(&book, query, id)
+	if filter.Date != 0 {
+		query += fmt.Sprintf(" AND date >= $%d", argID)
+		args = append(args, filter.Date)
+		argID++
+	}
+	if filter.Rating != 0 {
+		query += fmt.Sprintf(" AND rating <= $%d ORDER BY rating ASC", argID)
+		args = append(args, filter.Rating)
+		argID++
+	}
 
-// 	marshalledBook, marshalErr := json.Marshal(book)
-// 	if marshalErr != nil {
-// 		return book, marshalErr
-// 	}
+	log.Printf("the filtration request: %s", query)
 
-// 	redisErr = r.redis.Set(context.Background(), strconv.Itoa(book.ID), marshalledBook, 0).Err()
-// 	if redisErr != nil {
-// 		return book, redisErr
-// 	}
-// 	return book, err
-// }
+	err := r.db.Select(&books, query, args...)
+	return books, err
+}
 
-// func (r *repository) DeleteBook(id int) error {
-// 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", booksTable)
-// 	_, err := r.db.Exec(query, id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
+// write it in service better
+// хотя хз вроде тема написано, проблем не вижу
 func (r *repository) GetBookById(id int) (dtos.Book, error) {
 
 	book, err := r.getBookFromRedis(id)
@@ -93,7 +93,6 @@ func (r *repository) GetBookById(id int) (dtos.Book, error) {
 		return dtos.Book{}, err
 	}
 
-	// Кэшируем книгу в Redis
 	if err := r.cacheBookToRedis(book); err != nil {
 		log.Println("Error caching book to Redis:", err)
 	}

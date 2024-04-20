@@ -17,7 +17,16 @@ func (s *service) CreateBook(book dtos.Book) (int, error) {
 }
 
 func (s *service) GetAllBooks() ([]dtos.Book, error) {
+	//try_from_redis
+
+	//if error try from data base
+
+	//or just write in one function
 	return s.repo.GetAllBooks()
+}
+
+func (s *service) GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error) {
+	return s.repo.GetBooksByFilter(filter)
 }
 
 func (s *service) GetBookById(id int) (dtos.Book, error) {
