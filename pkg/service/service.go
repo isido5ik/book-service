@@ -5,20 +5,20 @@ import (
 	"RedisLesson/pkg/repository"
 )
 
-type Books interface {
-	Create(book dtos.Book) (int, error)
-	GetAll() ([]dtos.Book, error)
-	GetById(id int) (dtos.Book, error)
-	Delete(id int) error
-	Update(id int, input dtos.BookUpdateInput) error
+type Service interface {
+	CreateBook(book dtos.Book) (int, error)
+	GetAllBooks() ([]dtos.Book, error)
+	GetBookById(id int) (dtos.Book, error)
+	DeleteBook(id int) error
+	UpdateBook(id int, input dtos.BookUpdateInput) error
 }
 
-type Service struct {
-	Books
+type service struct {
+	repo repository.Repository
 }
 
-func NewService(repo *repository.Repository) *Service {
-	return &Service{
-		NewBookService(repo.Books),
+func NewService(repo repository.Repository) Service {
+	return &service{
+		repo: repo,
 	}
 }

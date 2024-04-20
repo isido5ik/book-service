@@ -4,24 +4,25 @@ import (
 	"RedisLesson/dtos"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 )
 
-type Books interface {
-	Create(book dtos.Book) (int, error)
-	GetAll() ([]dtos.Book, error)
-	GetById(id int) (dtos.Book, error)
-	Delete(id int) error
-	Update(id int, input dtos.BookUpdateInput) error
+type Repository interface {
+	CreateBook(book dtos.Book) (int, error)
+	GetAllBooks() ([]dtos.Book, error)
+	GetBookById(id int) (dtos.Book, error)
+	DeleteBook(id int) error
+	UpdateBook(id int, input dtos.BookUpdateInput) error
 }
 
-type Repository struct {
-	// Redis *redis.Client
-	Books
+type repository struct {
+	redis redis.Client
+	db    *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{
-		Books: NewBooksPostgres(db),
-		// Redis: NewRedisClient(),
+func NewRepository(db *sqlx.DB) Repository {
+	return &repository{
+		db:    db,
+		redis: *NewRedisClient(),
 	}
 }

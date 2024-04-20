@@ -14,7 +14,7 @@ func (h *Handler) createBook(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	id, err := h.services.Books.Create(input)
+	id, err := h.services.CreateBook(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -32,7 +32,7 @@ type getAllBooksResponse struct {
 
 func (h *Handler) getAllBooks(c *gin.Context) {
 	var books []dtos.Book
-	books, err := h.services.Books.GetAll()
+	books, err := h.services.GetAllBooks()
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -48,7 +48,7 @@ func (h *Handler) getBookById(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	book, err := h.services.Books.GetById(id)
+	book, err := h.services.GetBookById(id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -75,7 +75,7 @@ func (h *Handler) updateBook(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Update(id, input)
+	err = h.services.UpdateBook(id, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -91,7 +91,7 @@ func (h *Handler) deleteBook(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	err = h.services.Books.Delete(id)
+	err = h.services.DeleteBook(id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -2,33 +2,32 @@ package service
 
 import (
 	"RedisLesson/dtos"
-	"RedisLesson/pkg/repository"
 )
 
-type BookService struct {
-	repo repository.Books
+// type BookService struct {
+// 	repo repository.Repository
+// }
+
+// func NewBookService(repo repository.Repository) *BookService {
+// 	return &BookService{repo: repo}
+// }
+
+func (s *service) CreateBook(book dtos.Book) (int, error) {
+	return s.repo.CreateBook(book)
 }
 
-func NewBookService(repo repository.Books) *BookService {
-	return &BookService{repo: repo}
+func (s *service) GetAllBooks() ([]dtos.Book, error) {
+	return s.repo.GetAllBooks()
 }
 
-func (s *BookService) Create(book dtos.Book) (int, error) {
-	return s.repo.Create(book)
+func (s *service) GetBookById(id int) (dtos.Book, error) {
+	return s.repo.GetBookById(id)
 }
 
-func (s *BookService) GetAll() ([]dtos.Book, error) {
-	return s.repo.GetAll()
+func (s *service) DeleteBook(id int) error {
+	return s.repo.DeleteBook(id)
 }
 
-func (s *BookService) GetById(id int) (dtos.Book, error) {
-	return s.repo.GetById(id)
-}
-
-func (s *BookService) Delete(id int) error {
-	return s.repo.Delete(id)
-}
-
-func (s *BookService) Update(id int, input dtos.BookUpdateInput) error {
-	return s.repo.Update(id, input)
+func (s *service) UpdateBook(id int, input dtos.BookUpdateInput) error {
+	return s.repo.UpdateBook(id, input)
 }
