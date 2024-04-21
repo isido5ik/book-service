@@ -5,6 +5,7 @@ import (
 	"RedisLesson/pkg/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mock/mock.go
 type Service interface {
 	CreateBook(book dtos.Book) (int, error)
 	GetAllBooks(pagination dtos.PaginationParams) ([]dtos.Book, error)

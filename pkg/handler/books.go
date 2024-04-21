@@ -11,7 +11,7 @@ import (
 func (h *Handler) createBook(c *gin.Context) {
 	var input dtos.Book
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	id, err := h.services.CreateBook(input)
@@ -60,6 +60,10 @@ func (h *Handler) getBooksByFilter(c *gin.Context) {
 	var pagination dtos.PaginationParams
 	var err error
 	pagination.Page, pagination.PageSize, err = dtos.ValidatePage(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	var filter dtos.BookFilter
 	if err := c.BindJSON(&filter); err != nil {
@@ -100,6 +104,7 @@ func (h *Handler) getBookById(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, book)
 }
+
 func (h *Handler) updateBook(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
