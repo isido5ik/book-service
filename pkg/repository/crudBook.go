@@ -24,16 +24,19 @@ func (r *repository) CreateBook(book dtos.Book) (int, error) {
 	return id, nil
 }
 
-func (r *repository) GetAllBooks() ([]dtos.Book, error) {
+func (r *repository) GetAllBooks(pagination dtos.PaginationParams) ([]dtos.Book, error) {
 	var books []dtos.Book
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY rating ASC", booksTable)
+	offset := (pagination.Page - 1) * pagination.PageSize
+
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY rating ASC LIMIT %d OFFSET %d", booksTable, pagination.PageSize, offset)
 	err := r.db.Select(&books, query)
 
+	log.Printf("doing the request in get all method: %s", query)
 	return books, err
 }
 
 // default: ORDER BY rating
-func (r *repository) GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error) {
+func (r *repository) GetBooksByFilter(filter dtos.BookFilter, pagination dtos.PaginationParams) ([]dtos.Book, error) {
 	var books []dtos.Book
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE 1=1", booksTable)
@@ -71,6 +74,10 @@ func (r *repository) GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, erro
 		args = append(args, filter.Rating)
 		argID++
 	}
+
+	offset := (pagination.Page - 1) * pagination.PageSize
+
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", pagination.PageSize, offset)
 
 	log.Printf("the filtration request: %s", query)
 

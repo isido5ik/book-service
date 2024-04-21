@@ -27,43 +27,62 @@ func (h *Handler) createBook(c *gin.Context) {
 }
 
 type getAllBooksResponse struct {
-	Data []dtos.Book `json:"data"`
+	Data     []dtos.Book `json:"data"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"pageSize"`
 }
 
 func (h *Handler) getAllBooks(c *gin.Context) {
+	var pagination dtos.PaginationParams
+
+	var err error
+	pagination.Page, pagination.PageSize, err = dtos.ValidatePage(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+
 	var books []dtos.Book
-	books, err := h.services.GetAllBooks()
+	books, err = h.services.GetAllBooks(pagination)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, getAllBooksResponse{
-		Data: books,
+		Data:     books,
+		Page:     pagination.Page,
+		PageSize: pagination.PageSize,
 	})
 
 }
 
 func (h *Handler) getBooksByFilter(c *gin.Context) {
+
+	var pagination dtos.PaginationParams
+	var err error
+	pagination.Page, pagination.PageSize, err = dtos.ValidatePage(c)
+
 	var filter dtos.BookFilter
 	if err := c.BindJSON(&filter); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err := filter.Validate()
+	err = filter.Validate()
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	books, err := h.services.GetBooksByFilter(filter)
+	books, err := h.services.GetBooksByFilter(filter, pagination)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, getAllBooksResponse{
-		Data: books,
+		Data:     books,
+		Page:     pagination.Page,
+		PageSize: pagination.PageSize,
 	})
 
 }

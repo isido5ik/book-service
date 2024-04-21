@@ -9,11 +9,11 @@ import (
 
 type Repository interface {
 	CreateBook(book dtos.Book) (int, error)
-	GetAllBooks() ([]dtos.Book, error)
+	GetAllBooks(pagination dtos.PaginationParams) ([]dtos.Book, error)
 	GetBookById(id int) (dtos.Book, error)
 	DeleteBook(id int) error
 	UpdateBook(id int, input dtos.BookUpdateInput) error
-	GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error)
+	GetBooksByFilter(filter dtos.BookFilter, pagination dtos.PaginationParams) ([]dtos.Book, error)
 }
 
 type repository struct {

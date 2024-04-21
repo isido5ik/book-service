@@ -16,17 +16,17 @@ func (s *service) CreateBook(book dtos.Book) (int, error) {
 	return s.repo.CreateBook(book)
 }
 
-func (s *service) GetAllBooks() ([]dtos.Book, error) {
+func (s *service) GetAllBooks(pagination dtos.PaginationParams) ([]dtos.Book, error) {
 	//try_from_redis
 
 	//if error try from data base
 
 	//or just write in one function
-	return s.repo.GetAllBooks()
+	return s.repo.GetAllBooks(pagination)
 }
 
-func (s *service) GetBooksByFilter(filter dtos.BookFilter) ([]dtos.Book, error) {
-	return s.repo.GetBooksByFilter(filter)
+func (s *service) GetBooksByFilter(filter dtos.BookFilter, pagination dtos.PaginationParams) ([]dtos.Book, error) {
+	return s.repo.GetBooksByFilter(filter, pagination)
 }
 
 func (s *service) GetBookById(id int) (dtos.Book, error) {
